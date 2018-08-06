@@ -1,0 +1,3 @@
+# Modular Synth 2
+
+A digital modular synthesizer system, based on the Teensy audio platform. A Teensy program listens for data from a series of slave "modules" (oscillators, filters, amplifiers, etc), which feature inputs, outputs, and controls. The result is a system which is similar in form and function to an analogue modular synthesiser, with the main difference being that the audio is all generated and processed digitally within a single computer (the Teensy), rather than by a number of connected analogue sound sources and effects. This means that no audio data is transmitted through the patch cables; instead, patch cable routing is treated as digital information and passed from the modules to the Teensy, where the patching is instantly replicated in software.
