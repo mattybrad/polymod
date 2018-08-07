@@ -12,6 +12,7 @@ class Module {
     int getID();
   private:
     int _id;
+    
 };
 
 #endif

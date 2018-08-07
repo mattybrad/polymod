@@ -1,22 +1,13 @@
 #include "Arduino.h"
 #include "Module.h"
 
+#define OUTPUT_MODULE 1
+#define VCO_MODULE 2
+#define VCF_MODULE 3
+#define VCA_MODULE 4
+
 Module::Module(int moduleID) {
   _id = moduleID;
-  
-  // initialise module based on its type (VCO, VCF, LFO, etc)
-  switch(_id) {
-    case 1:
-    Serial.println("VCO");
-    break;
-    
-    case 2:
-    Serial.println("VCF");
-    break;
-
-    default:
-    Serial.println("unrecognised ID");
-  }
 }
 
 int Module::getID() {

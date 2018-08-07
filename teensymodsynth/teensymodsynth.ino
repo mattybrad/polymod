@@ -1,3 +1,9 @@
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
 #include "Module.h"
 
 #define MODULE_SLOTS 8
@@ -8,7 +14,15 @@ const int MODULE_ID_PINS[MODULE_SLOTS] = {2,2,2,2,2,2,2,2};
 Module *modules[MODULE_SLOTS]; // array of pointers to module instances
 byte moduleIdReadings[MODULE_SLOTS];
 
+AudioControlSGTL5000 sgtl;
+
 void setup() {
+  
+  // initialise audio board
+  AudioMemory(50);
+  sgtl.enable();
+  sgtl.volume(0.5);
+  
   // initialise module pointers to null
   for(int i=0;i<MODULE_SLOTS;i++) {
     modules[i] = NULL;
@@ -40,7 +54,8 @@ void loop() {
   }
 
   // for each module slot, check if module has been added, changed (very unlikely in one loop cycle!), or removed
-  for(int i=0;i<MODULE_SLOTS;i++) {
+  // for now, only checking one module slot for testing
+  for(int i=0;i<1;i++) {
     int currentModuleID = 0; // default to ID=0, i.e. module slot is empty
     if(modules[i]) currentModuleID = modules[i]->getID(); // get ID of current module if slot not empty
     if(moduleIdReadings[i] != currentModuleID) {
