@@ -5,6 +5,7 @@
 #include <SerialFlash.h>
 
 #include "Module.h"
+#include "Output.h"
 #include "VCO.h"
 #include "PatchCable.h"
 
@@ -39,19 +40,15 @@ void setup() {
   sgtl.enable();
   sgtl.volume(0.5);
 
-  // initialise shift register pins
-  pinMode(CLOCK_PIN, OUTPUT);
-  pinMode(SHIFT_PIN, OUTPUT);
-  for(int i=0;i<MODULE_SLOTS;i++) {
-    pinMode(MODULE_ID_PINS[i],INPUT); 
-  }
-
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
-    pinMode(SOCKET_SEND_SELECT_PINS[i], OUTPUT);
-    pinMode(SOCKET_RECEIVE_SELECT_PINS[i], OUTPUT);
+    pinMode(SOCKET_SEND_ROOT_SELECT_PINS[i], OUTPUT);
+    pinMode(SOCKET_SEND_MODULE_SELECT_PINS[i], OUTPUT);
+    pinMode(SOCKET_RECEIVE_ROOT_SELECT_PINS[i], OUTPUT);
+    pinMode(SOCKET_RECEIVE_MODULE_SELECT_PINS[i], OUTPUT);
   }
   pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
+  pinMode(MODULE_ID_PIN, INPUT);
   
   Serial.begin(9600);
 
@@ -91,35 +88,57 @@ void setup() {
 void loop() {
 
   boolean newConnection;
-  for(int i=0;i<8;i++) {
-    // switch the output channel
-    digitalWrite(SOCKET_SEND_SELECT_PINS[0],bitRead(i,0));
-    digitalWrite(SOCKET_SEND_SELECT_PINS[1],bitRead(i,1));
-    digitalWrite(SOCKET_SEND_SELECT_PINS[2],bitRead(i,2));
+  for(int a=0;a<8;a++) {
+    // switch the root socket send channel
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[0],bitRead(a,0));
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[1],bitRead(a,1));
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[2],bitRead(a,2));
     
-    for(int j=0;j<8;j++) {
-      // switch the input channel
-      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[0],bitRead(j,0));
-      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[1],bitRead(j,1));
-      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[2],bitRead(j,2));
+    for(int b=0;b<8;b++) {
+      // switch the module socket send channel
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[0],bitRead(b,0));
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[1],bitRead(b,1));
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[2],bitRead(b,2));
 
-      delayMicroseconds(10);
+      for(int c=0;c<8;c++) {
+        // switch the root socket receive channel
+        digitalWrite(SOCKET_RECEIVE_ROOT_SELECT_PINS[0],bitRead(c,0));
+        digitalWrite(SOCKET_RECEIVE_ROOT_SELECT_PINS[1],bitRead(c,1));
+        digitalWrite(SOCKET_RECEIVE_ROOT_SELECT_PINS[2],bitRead(c,2));
+
+        for(int d=0;d<8;d++) {
+          // switch the module socket receive channel
+          digitalWrite(SOCKET_RECEIVE_MODULE_SELECT_PINS[0],bitRead(d,0));
+          digitalWrite(SOCKET_RECEIVE_MODULE_SELECT_PINS[1],bitRead(d,1));
+          digitalWrite(SOCKET_RECEIVE_MODULE_SELECT_PINS[2],bitRead(d,2));
+
+          int socket1 = a*8+b;
+          int socket2 = c*8+d;
+
+          if(socket1 > socket2) {
+            newConnection = false;
+            if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
+              newConnection = true;
+            }
+
+            // testing code, overrides any actual connections
+            if(true) {
+              
+            }
       
-      newConnection = false;
-      if(i>j && digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
-        newConnection = true;
-      }
-
-      if(newConnection != patchCableConnections[i][j]) {
-        if(newConnection) {
-          // make connection
-          addPatchCable(i,j);
-        } else {
-          // break connection
-          removePatchCable(i,j);
+            if(newConnection != patchCableConnections[socket1][socket2]) {
+              if(newConnection) {
+                // make connection
+                addPatchCable(socket1,socket2);
+              } else {
+                // break connection
+                removePatchCable(socket1,socket2);
+              }
+            }
+            patchCableConnections[socket1][socket2] = newConnection;
+          }
         }
       }
-      patchCableConnections[i][j] = newConnection;
     }
   }
 }
