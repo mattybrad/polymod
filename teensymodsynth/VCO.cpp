@@ -4,7 +4,7 @@
 
 VCO::VCO() {
   _saw.begin(0.5,220,WAVEFORM_SAWTOOTH);
-  _square.begin(0.5,270,WAVEFORM_SQUARE);
+  _square.begin(0.5,275,WAVEFORM_SQUARE);
   _triangle.begin(0.5,330,WAVEFORM_TRIANGLE);
   _sine.begin(0.5,440,WAVEFORM_SINE);
   sockets[0].setOutput(_saw, 0);

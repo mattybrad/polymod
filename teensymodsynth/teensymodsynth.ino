@@ -7,6 +7,7 @@
 #include "Module.h"
 #include "Output.h"
 #include "VCO.h"
+#include "Mixer.h"
 #include "PatchCable.h"
 
 #define EMPTY_MODULE 0
@@ -14,6 +15,7 @@
 #define VCO_MODULE 2
 #define VCF_MODULE 3
 #define VCA_MODULE 4
+#define MIXER_MODULE 5
 
 #define MODULE_SLOTS 8
 #define SOCKET_RECEIVE_DATA_PIN 27
@@ -71,6 +73,7 @@ void setup() {
       moduleIdReadings[a] = EMPTY_MODULE;
       moduleIdReadings[0] = OUTPUT_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
+      moduleIdReadings[2] = MIXER_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -84,6 +87,10 @@ void setup() {
 
       case VCO_MODULE:
       modules[a] = new VCO();
+      break;
+
+      case MIXER_MODULE:
+      modules[a] = new Mixer();
       break;
 
       default:
@@ -130,7 +137,11 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              if(a==1 && b==0 && c==0 && d==0) newConnection = true;
+              if(a==2 && b==0 && c==1 && d==0) newConnection = true;
+              if(a==2 && b==1 && c==1 && d==1) newConnection = true;
+              if(a==2 && b==2 && c==1 && d==2) newConnection = true;
+              if(a==2 && b==3 && c==1 && d==3) newConnection = true;
+              if(a==2 && b==4 && c==0 && d==0) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {
