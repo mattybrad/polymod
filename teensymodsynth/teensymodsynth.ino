@@ -11,9 +11,12 @@
 #define MODULE_SLOTS 8
 #define CLOCK_PIN 4
 #define SHIFT_PIN 3
+#define SOCKET_RECEIVE_DATA_PIN 14
 #define MAX_CABLES 100
 const int NUM_SOCKETS = MODULE_SLOTS * 8;
 const int MODULE_ID_PINS[MODULE_SLOTS] = {2,2,2,2,2,2,2,2};
+const int SOCKET_SEND_SELECT_PINS[] = {5,6,7};
+const int SOCKET_RECEIVE_SELECT_PINS[] = {8,10,12};
 
 Module *modules[MODULE_SLOTS]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
@@ -40,6 +43,14 @@ void setup() {
   for(int i=0;i<MODULE_SLOTS;i++) {
     pinMode(MODULE_ID_PINS[i],INPUT); 
   }
+
+  // initialise mux/demux pins
+  for(int i=0;i<3;i++) {
+    pinMode(SOCKET_SEND_SELECT_PINS[i], OUTPUT);
+    pinMode(SOCKET_RECEIVE_SELECT_PINS[i], OUTPUT);
+  }
+  pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
+  
   Serial.begin(9600);
 
   delay(2000);
@@ -90,14 +101,23 @@ void loop() {
   // check for patch cable connections
   // for now, just add them manually
   boolean newConnection;
-  for(int i=0;i<NUM_SOCKETS;i++) {
-    // switch the output channel (add later)
-    for(int j=0;j<NUM_SOCKETS;j++) {
-      // switch the input channel (add later)
+  for(int i=0;i<8;i++) {
+    // switch the output channel
+    digitalWrite(SOCKET_SEND_SELECT_PINS[0],bitRead(i,0));
+    digitalWrite(SOCKET_SEND_SELECT_PINS[1],bitRead(i,1));
+    digitalWrite(SOCKET_SEND_SELECT_PINS[2],bitRead(i,2));
+    
+    for(int j=0;j<8;j++) {
+      // switch the input channel
+      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[0],bitRead(j,0));
+      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[1],bitRead(j,1));
+      digitalWrite(SOCKET_RECEIVE_SELECT_PINS[2],bitRead(j,2));
 
+      delayMicroseconds(10);
+      
       newConnection = false;
-      if(i==1&&j==0) {
-        newConnection = true; // temporary
+      if(i>j && digitalRead(SOCKET_RECEIVE_DATA_PIN) && i==1 && j==0) {
+        newConnection = true;
       }
 
       if(newConnection != patchCableConnections[i][j]) {
