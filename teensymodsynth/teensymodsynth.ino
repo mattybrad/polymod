@@ -8,15 +8,22 @@
 #include "VCO.h"
 #include "PatchCable.h"
 
+#define EMPTY_MODULE 0
+#define OUTPUT_MODULE 1
+#define VCO_MODULE 2
+#define VCF_MODULE 3
+#define VCA_MODULE 4
+
 #define MODULE_SLOTS 8
-#define CLOCK_PIN 4
-#define SHIFT_PIN 3
-#define SOCKET_RECEIVE_DATA_PIN 14
+#define SOCKET_RECEIVE_DATA_PIN 27
+#define MODULE_ID_PIN 28
+#define ANALOG_DATA_PIN 33
 #define MAX_CABLES 100
 const int NUM_SOCKETS = MODULE_SLOTS * 8;
-const int MODULE_ID_PINS[MODULE_SLOTS] = {2,2,2,2,2,2,2,2};
-const int SOCKET_SEND_SELECT_PINS[] = {5,6,7};
-const int SOCKET_RECEIVE_SELECT_PINS[] = {8,10,12};
+const int SOCKET_SEND_ROOT_SELECT_PINS[] = {2,3,4};
+const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {17,20,21};
+const int SOCKET_SEND_MODULE_SELECT_PINS[] = {5,8,16};
+const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {24,25,26};
 
 Module *modules[MODULE_SLOTS]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
@@ -31,11 +38,6 @@ void setup() {
   AudioMemory(50);
   sgtl.enable();
   sgtl.volume(0.5);
-  
-  // initialise module pointers to null
-  for(int i=0;i<MODULE_SLOTS;i++) {
-    modules[i] = NULL;
-  }
 
   // initialise shift register pins
   pinMode(CLOCK_PIN, OUTPUT);
@@ -53,53 +55,41 @@ void setup() {
   
   Serial.begin(9600);
 
-  delay(2000);
+  // read module slots
+  for(int a=0;a<MODULE_SLOTS;a++) {
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[0],bitRead(a,0));
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[1],bitRead(a,1));
+    digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[2],bitRead(a,2));
+    
+    for(int b=0;b<8;b++) {
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[0],bitRead(b,0));
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[1],bitRead(b,1));
+      digitalWrite(SOCKET_SEND_MODULE_SELECT_PINS[2],bitRead(b,2));
+
+      bitWrite(moduleIdReadings[a],b,digitalRead(MODULE_ID_PIN));
+    }
+
+    switch(moduleIdReadings[a]) {
+      case EMPTY_MODULE:
+      modules[a] = NULL;
+      break;
+
+      case OUTPUT_MODULE:
+      modules[a] = new Output();
+      break;
+
+      case VCO_MODULE:
+      modules[a] = new VCO();
+      break;
+
+      default:
+      modules[a] = NULL;
+    }
+  }
 }
 
 void loop() {
-  // read module slots
-  digitalWrite(CLOCK_PIN, LOW);
-  digitalWrite(SHIFT_PIN, LOW);
-  delay(5);
-  digitalWrite(SHIFT_PIN, HIGH);
-  for(int i=0;i<8;i++) {
-    for(int j=0;j<MODULE_SLOTS;j++) {
-      bitWrite(moduleIdReadings[j],i,digitalRead(MODULE_ID_PINS[j]));
-    }
-    digitalWrite(CLOCK_PIN, LOW);
-    delay(1);
-    digitalWrite(CLOCK_PIN, HIGH);
-    delay(1);
-  }
 
-  // for each module slot, check if module has been added, changed (very unlikely in one loop cycle!), or removed
-  // for now, only checking one module slot for testing
-  for(int i=0;i<1;i++) {
-    int currentModuleID = 0; // default to ID=0, i.e. module slot is empty
-    if(modules[i]) currentModuleID = modules[i]->getID(); // get ID of current module if slot not empty
-    if(moduleIdReadings[i] != currentModuleID) {
-      // something has changed
-
-      if(moduleIdReadings[i] == 0) {
-        // module has been removed
-        delete modules[i];
-        modules[i] = NULL;
-        Serial.println("REMOVED MODULE");
-      } else if(currentModuleID == 0) {
-        // module has been added
-        modules[i] = new VCO();
-        Serial.println("ADDED MODULE");
-      } else {
-        // module has been changed (removed then added very quickly!)
-        delete modules[i];
-        modules[i] = new VCO();
-        Serial.println("CHANGED MODULE");
-      }
-    }
-  }
-
-  // check for patch cable connections
-  // for now, just add them manually
   boolean newConnection;
   for(int i=0;i<8;i++) {
     // switch the output channel
