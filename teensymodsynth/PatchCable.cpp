@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "PatchCable.h"
 
-PatchCable::PatchCable(Socket& highSocket, Socket& lowSocket) {
+PatchCable::PatchCable(int highSocketIndex, int lowSocketIndex, Socket& highSocket, Socket& lowSocket) {
   if(highSocket.isOutput()!=lowSocket.isOutput()) {
     _valid = true;
     if(highSocket.isOutput()) {
@@ -16,6 +16,8 @@ PatchCable::PatchCable(Socket& highSocket, Socket& lowSocket) {
   }
   _highSocket = &highSocket;
   _lowSocket = &lowSocket;
+  _highSocketIndex = highSocketIndex;
+  _lowSocketIndex = lowSocketIndex;
   if(_valid) {
     _sourceStream = _sourceSocket->getStream();
     _destStream = _destSocket->getStream();
@@ -23,5 +25,17 @@ PatchCable::PatchCable(Socket& highSocket, Socket& lowSocket) {
   } else {
     // not valid, no audio connection possible
   }
+}
+
+int PatchCable::getHighSocket() {
+  return _highSocketIndex;
+}
+
+int PatchCable::getLowSocket() {
+  return _lowSocketIndex;
+}
+
+void PatchCable::disconnect() {
+  if(_valid) _audioConnection->disconnect();
 }
 

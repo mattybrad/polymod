@@ -116,7 +116,7 @@ void loop() {
       delayMicroseconds(10);
       
       newConnection = false;
-      if(i>j && digitalRead(SOCKET_RECEIVE_DATA_PIN) && i==1 && j==0) {
+      if(i>j && digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
         newConnection = true;
       }
 
@@ -140,7 +140,7 @@ void addPatchCable(int highSocket, int lowSocket) {
     if(patchCables[i]==NULL) foundIndex = i;
   }
   if(foundIndex >= 0) {
-    patchCables[foundIndex] = new PatchCable(getSocket(highSocket), getSocket(lowSocket));
+    patchCables[foundIndex] = new PatchCable(highSocket, lowSocket, getSocket(highSocket), getSocket(lowSocket));
     Serial.println("ADDED CABLE");
   } else {
     Serial.println("CAN'T ADD NEW CABLE");
@@ -148,7 +148,18 @@ void addPatchCable(int highSocket, int lowSocket) {
 }
 
 void removePatchCable(int highSocket, int lowSocket) {
-  Serial.println("REMOVE PATCH");
+  for(int i=0;i<MAX_CABLES;i++) {
+    if(patchCables[i]!=NULL) {
+      // a cable exists in this slot
+      if(highSocket==patchCables[i]->getHighSocket() && lowSocket==patchCables[i]->getLowSocket()) {
+        // remove cable
+        patchCables[i]->disconnect();
+        delete patchCables[i];
+        patchCables[i] = NULL;
+        Serial.println("REMOVED CABLE");
+      }
+    }
+  }
 }
 
 Socket &getSocket(int socketNumber) {

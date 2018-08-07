@@ -18,3 +18,7 @@ Socket& Module::getSocket(int moduleSocketNumber) {
   return sockets[moduleSocketNumber];
 }
 
+void Module::removePatchCable(int moduleSocketNumber) {
+  
+}
+

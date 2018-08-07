@@ -11,6 +11,7 @@ class Module {
     Control controls[8];
     int getID();
     Socket& getSocket(int moduleSocketNumber);
+    void removePatchCable(int moduleSocketNumber);
   private:
     int _id;
     
