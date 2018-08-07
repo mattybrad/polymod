@@ -9,7 +9,6 @@ class VCO : public Module {
     VCO();
   private:
     AudioSynthWaveform _wave;
-    AudioOutputI2S _output;
 };
 
 #endif
