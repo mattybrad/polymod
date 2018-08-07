@@ -66,6 +66,13 @@ void setup() {
       bitWrite(moduleIdReadings[a],b,digitalRead(MODULE_ID_PIN));
     }
 
+    // test code, overrides actual readings
+    if(true) {
+      moduleIdReadings[a] = EMPTY_MODULE;
+      moduleIdReadings[0] = OUTPUT_MODULE;
+      moduleIdReadings[1] = VCO_MODULE;
+    }
+
     switch(moduleIdReadings[a]) {
       case EMPTY_MODULE:
       modules[a] = NULL;
@@ -123,7 +130,7 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              
+              if(a==1 && b==0 && c==0 && d==0) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {
