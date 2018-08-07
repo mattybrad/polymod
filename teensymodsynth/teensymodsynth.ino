@@ -5,14 +5,20 @@
 #include <SerialFlash.h>
 
 #include "Module.h"
+#include "VCO.h"
+#include "PatchCable.h"
 
 #define MODULE_SLOTS 8
 #define CLOCK_PIN 4
 #define SHIFT_PIN 3
+#define MAX_CABLES 100
+const int NUM_SOCKETS = MODULE_SLOTS * 8;
 const int MODULE_ID_PINS[MODULE_SLOTS] = {2,2,2,2,2,2,2,2};
 
 Module *modules[MODULE_SLOTS]; // array of pointers to module instances
-byte moduleIdReadings[MODULE_SLOTS];
+PatchCable *patchCables[MAX_CABLES];
+byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
+boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 
 AudioControlSGTL5000 sgtl;
 
@@ -35,6 +41,8 @@ void setup() {
     pinMode(MODULE_ID_PINS[i],INPUT); 
   }
   Serial.begin(9600);
+
+  delay(2000);
 }
 
 void loop() {
@@ -65,19 +73,69 @@ void loop() {
         // module has been removed
         delete modules[i];
         modules[i] = NULL;
-        Serial.println("REMOVED");
+        Serial.println("REMOVED MODULE");
       } else if(currentModuleID == 0) {
         // module has been added
-        modules[i] = new Module(moduleIdReadings[i]);
-        Serial.println("ADDED");
+        modules[i] = new VCO();
+        Serial.println("ADDED MODULE");
       } else {
         // module has been changed (removed then added very quickly!)
         delete modules[i];
-        modules[i] = new Module(moduleIdReadings[i]);
-        Serial.println("CHANGED");
+        modules[i] = new VCO();
+        Serial.println("CHANGED MODULE");
       }
     }
   }
-  
-  delay(500);
+
+  // check for patch cable connections
+  // for now, just add them manually
+  boolean newConnection;
+  for(int i=0;i<NUM_SOCKETS;i++) {
+    // switch the output channel (add later)
+    for(int j=0;j<NUM_SOCKETS;j++) {
+      // switch the input channel (add later)
+
+      newConnection = false;
+      if(i==1&&j==0) {
+        newConnection = true; // temporary
+      }
+
+      if(newConnection != patchCableConnections[i][j]) {
+        if(newConnection) {
+          // make connection
+          addPatchCable(i,j);
+        } else {
+          // break connection
+          removePatchCable(i,j);
+        }
+      }
+      patchCableConnections[i][j] = newConnection;
+    }
+  }
 }
+
+void addPatchCable(int highSocket, int lowSocket) {
+  int foundIndex = -1;
+  for(int i=0;i<MAX_CABLES&&foundIndex==-1;i++) {
+    if(patchCables[i]==NULL) foundIndex = i;
+  }
+  if(foundIndex >= 0) {
+    patchCables[foundIndex] = new PatchCable(getSocket(highSocket), getSocket(lowSocket));
+    Serial.println("ADDED CABLE");
+  } else {
+    Serial.println("CAN'T ADD NEW CABLE");
+  }
+}
+
+void removePatchCable(int highSocket, int lowSocket) {
+  Serial.println("REMOVE PATCH");
+}
+
+Socket &getSocket(int socketNumber) {
+  int moduleNumber = socketNumber / 8;
+  int moduleSocketNumber = socketNumber % 8;
+  Serial.println(moduleNumber);
+  Serial.println(moduleSocketNumber);
+  return modules[moduleNumber]->getSocket(moduleSocketNumber);
+}
+
