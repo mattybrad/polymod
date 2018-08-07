@@ -8,6 +8,7 @@
 #include "Output.h"
 #include "VCO.h"
 #include "Mixer.h"
+#include "LFO.h"
 #include "PatchCable.h"
 
 #define EMPTY_MODULE 0
@@ -16,6 +17,7 @@
 #define VCF_MODULE 3
 #define VCA_MODULE 4
 #define MIXER_MODULE 5
+#define LFO_MODULE 6
 
 #define MODULE_SLOTS 8
 #define SOCKET_RECEIVE_DATA_PIN 27
@@ -74,6 +76,7 @@ void setup() {
       moduleIdReadings[0] = OUTPUT_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
       moduleIdReadings[2] = MIXER_MODULE;
+      moduleIdReadings[3] = LFO_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -91,6 +94,10 @@ void setup() {
 
       case MIXER_MODULE:
       modules[a] = new Mixer();
+      break;
+
+      case LFO_MODULE:
+      modules[a] = new LFO();
       break;
 
       default:
@@ -141,6 +148,7 @@ void loop() {
               if(a==2 && b==1 && c==1 && d==1) newConnection = true;
               if(a==2 && b==2 && c==1 && d==2) newConnection = true;
               if(a==2 && b==3 && c==1 && d==3) newConnection = true;
+              if(a==3 && b==4 && c==1 && d==4) newConnection = true;
               if(a==2 && b==4 && c==0 && d==0) newConnection = true;
             }
       
