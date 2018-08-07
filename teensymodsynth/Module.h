@@ -6,11 +6,12 @@
 
 class Module {
   public:
-    Module(int moduleType);
+    Module(int moduleID);
     Socket sockets[8];
     Control controls[8];
+    int getID();
   private:
-    
+    int _id;
 };
 
 #endif
