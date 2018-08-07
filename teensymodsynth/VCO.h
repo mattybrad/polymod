@@ -8,7 +8,10 @@ class VCO : public Module {
   public:
     VCO();
   private:
-    AudioSynthWaveform _wave;
+    AudioSynthWaveform _saw;
+    AudioSynthWaveform _square;
+    AudioSynthWaveform _triangle;
+    AudioSynthWaveform _sine;
 };
 
 #endif
