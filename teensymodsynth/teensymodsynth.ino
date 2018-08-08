@@ -155,13 +155,7 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              if(a==2 && b==0 && c==1 && d==0) newConnection = true;
-              if(a==2 && b==1 && c==1 && d==1) newConnection = true;
-              if(a==2 && b==2 && c==1 && d==2) newConnection = true;
-              if(a==2 && b==3 && c==1 && d==3) newConnection = true;
-              if(a==3 && b==1 && c==1 && d==4) newConnection = true;
-              if(a==4 && b==0 && c==2 && d==4) newConnection = true;
-              if(a==4 && b==2 && c==0 && d==0) newConnection = true;
+              if(fakeConnection(socket1,socket2,1,0,0,0)) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {
@@ -215,5 +209,13 @@ Socket &getSocket(int socketNumber) {
   Serial.println(moduleNumber);
   Serial.println(moduleSocketNumber);
   return modules[moduleNumber]->getSocket(moduleSocketNumber);
+}
+
+boolean fakeConnection(int socket1, int socket2, int module1, int moduleSocket1, int module2, int moduleSocket2) {
+  int testSocket1 = 8*module1 + moduleSocket1;
+  int testSocket2 = 8*module2 + moduleSocket2;
+  if(socket1==testSocket1 && socket2==testSocket2) return true;
+  if(socket1==testSocket2 && socket2==testSocket1) return true;
+  return false;
 }
 
