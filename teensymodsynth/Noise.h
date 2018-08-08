@@ -7,6 +7,7 @@
 class Noise : public Module {
   public:
     Noise();
+    virtual void update();
   private:
     AudioSynthNoiseWhite _noise;
 };

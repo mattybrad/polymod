@@ -12,6 +12,7 @@ class Module {
     int getID();
     Socket& getSocket(int moduleSocketNumber);
     void removePatchCable(int moduleSocketNumber);
+    virtual void update() {};
   private:
     int _id;
     

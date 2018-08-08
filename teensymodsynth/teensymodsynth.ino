@@ -84,6 +84,8 @@ void setup() {
       moduleIdReadings[2] = MIXER_MODULE;
       moduleIdReadings[3] = LFO_MODULE;
       moduleIdReadings[4] = VCF_MODULE;
+      moduleIdReadings[5] = VCA_MODULE;
+      moduleIdReadings[6] = NOISE_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -109,6 +111,14 @@ void setup() {
 
       case VCF_MODULE:
       modules[a] = new VCF();
+      break;
+
+      case VCA_MODULE:
+      modules[a] = new VCA();
+      break;
+
+      case NOISE_MODULE:
+      modules[a] = new Noise();
       break;
 
       default:
@@ -147,6 +157,8 @@ void loop() {
           int socket1 = a*8+b;
           int socket2 = c*8+d;
 
+          if(modules[d]) modules[d]->update();
+
           if(socket1 > socket2) {
             newConnection = false;
             if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
@@ -155,7 +167,9 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              if(fakeConnection(socket1,socket2,1,0,0,0)) newConnection = true;
+              if(fakeConnection(socket1,socket2,6,0,5,0)) newConnection = true;
+              if(fakeConnection(socket1,socket2,3,2,5,1)) newConnection = true;
+              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {
