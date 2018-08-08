@@ -3,7 +3,7 @@
 #include "Socket.h"
 
 LFO::LFO() {
-  float freq = 5.0;
+  float freq = 4;
   _saw.begin(0.5,freq,WAVEFORM_SAWTOOTH);
   _inverseSaw.begin(0.5,freq,WAVEFORM_SAWTOOTH_REVERSE);
   _sine.begin(0.5,freq,WAVEFORM_SINE);

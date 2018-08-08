@@ -9,6 +9,9 @@ class Output : public Module {
     Output();
   private:
     AudioOutputI2S _output;
+    AudioAmplifier _outputSplitter;
+    AudioConnection* _patchCable1;
+    AudioConnection* _patchCable2;
 };
 
 #endif

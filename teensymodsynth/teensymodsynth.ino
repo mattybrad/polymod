@@ -10,6 +10,10 @@
 #include "Mixer.h"
 #include "LFO.h"
 #include "PatchCable.h"
+#include "VCF.h"
+#include "Noise.h"
+#include "Envelope.h"
+#include "VCA.h"
 
 #define EMPTY_MODULE 0
 #define OUTPUT_MODULE 1
@@ -18,6 +22,8 @@
 #define VCA_MODULE 4
 #define MIXER_MODULE 5
 #define LFO_MODULE 6
+#define NOISE_MODULE 7
+#define ENVELOPE_MODULE 8
 
 #define MODULE_SLOTS 8
 #define SOCKET_RECEIVE_DATA_PIN 27
@@ -77,6 +83,7 @@ void setup() {
       moduleIdReadings[1] = VCO_MODULE;
       moduleIdReadings[2] = MIXER_MODULE;
       moduleIdReadings[3] = LFO_MODULE;
+      moduleIdReadings[4] = VCF_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -98,6 +105,10 @@ void setup() {
 
       case LFO_MODULE:
       modules[a] = new LFO();
+      break;
+
+      case VCF_MODULE:
+      modules[a] = new VCF();
       break;
 
       default:
@@ -148,8 +159,9 @@ void loop() {
               if(a==2 && b==1 && c==1 && d==1) newConnection = true;
               if(a==2 && b==2 && c==1 && d==2) newConnection = true;
               if(a==2 && b==3 && c==1 && d==3) newConnection = true;
-              if(a==3 && b==4 && c==1 && d==4) newConnection = true;
-              if(a==2 && b==4 && c==0 && d==0) newConnection = true;
+              if(a==3 && b==1 && c==1 && d==4) newConnection = true;
+              if(a==4 && b==0 && c==2 && d==4) newConnection = true;
+              if(a==4 && b==2 && c==0 && d==0) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {
