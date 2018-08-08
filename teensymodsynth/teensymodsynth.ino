@@ -86,6 +86,7 @@ void setup() {
       moduleIdReadings[4] = VCF_MODULE;
       moduleIdReadings[5] = VCA_MODULE;
       moduleIdReadings[6] = NOISE_MODULE;
+      moduleIdReadings[7] = ENVELOPE_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -119,6 +120,10 @@ void setup() {
 
       case NOISE_MODULE:
       modules[a] = new Noise();
+      break;
+
+      case ENVELOPE_MODULE:
+      modules[a] = new Envelope();
       break;
 
       default:
@@ -168,8 +173,9 @@ void loop() {
             // testing code, overrides any actual connections
             if(true) {
               if(fakeConnection(socket1,socket2,6,0,5,0)) newConnection = true;
-              if(fakeConnection(socket1,socket2,3,2,5,1)) newConnection = true;
+              if(fakeConnection(socket1,socket2,3,4,7,0)) newConnection = true;
               if(fakeConnection(socket1,socket2,5,2,0,0)) newConnection = true;
+              if(fakeConnection(socket1,socket2,7,1,5,1)) newConnection = true;
             }
       
             if(newConnection != patchCableConnections[socket1][socket2]) {

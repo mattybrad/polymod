@@ -7,7 +7,3 @@ Noise::Noise() {
   sockets[0].setOutput(_noise, 0);
 }
 
-void Noise::update() {
-  Serial.println("NOISE");
-}
-
