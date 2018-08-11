@@ -5,8 +5,8 @@
 Envelope::Envelope() {
   _dc.amplitude(1.0);
   _envelope.attack(1.5);
-  _envelope.sustain(0.5);
-  _envelope.release(200);
+  _envelope.sustain(0.2);
+  _envelope.release(1000);
   _patchCable1 = new AudioConnection(_dc,0,_envelope,0);
   _queue.begin();
   sockets[0].setInput(_queue, 0); // gate

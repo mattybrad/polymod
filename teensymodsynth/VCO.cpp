@@ -13,9 +13,10 @@ VCO::VCO() {
   _triangle.begin(0.5,freq,WAVEFORM_TRIANGLE);
   _sine.begin(0.5,freq,WAVEFORM_SINE);
   _freqMod.gain(0.1);
-  sockets[0].setOutput(_saw, 0);
-  sockets[1].setOutput(_square, 0);
-  sockets[2].setOutput(_triangle, 0);
-  sockets[3].setOutput(_sine, 0);
-  sockets[4].setInput(_freqMod, 0);
+  sockets[0].setInput(_freqMod, 0);
+  sockets[1].setOutput(_saw, 0);
+  sockets[2].setOutput(_square, 0);
+  sockets[3].setOutput(_triangle, 0);
+  sockets[4].setOutput(_sine, 0);
+  
 }

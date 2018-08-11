@@ -44,7 +44,7 @@ boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 AudioControlSGTL5000 sgtl;
 
 void setup() {
-  
+
   // initialise audio board
   AudioMemory(50);
   sgtl.enable();
@@ -85,7 +85,7 @@ void setup() {
       moduleIdReadings[3] = LFO_MODULE;
       moduleIdReadings[4] = VCF_MODULE;
       moduleIdReadings[5] = VCA_MODULE;
-      moduleIdReadings[6] = NOISE_MODULE;
+      moduleIdReadings[6] = LFO_MODULE;
       moduleIdReadings[7] = ENVELOPE_MODULE;
     }
 
@@ -134,7 +134,7 @@ void setup() {
 
 void loop() {
 
-  boolean newConnection;
+  boolean newConnectionReading;
   for(int a=0;a<8;a++) {
     // switch the root socket send channel
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[0],bitRead(a,0));
@@ -165,21 +165,22 @@ void loop() {
           if(modules[d]) modules[d]->update();
 
           if(socket1 > socket2) {
-            newConnection = false;
+            newConnectionReading = false;
             if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
-              newConnection = true;
+              newConnectionReading = true;
             }
 
             // testing code, overrides any actual connections
             if(true) {
-              if(fakeConnection(socket1,socket2,6,0,5,0)) newConnection = true;
-              if(fakeConnection(socket1,socket2,3,4,7,0)) newConnection = true;
-              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnection = true;
-              if(fakeConnection(socket1,socket2,7,1,5,1)) newConnection = true;
+              if(fakeConnection(socket1,socket2,1,2,5,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,3,4,7,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,7,1,5,1)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,6,4,1,0)) newConnectionReading = true;
             }
       
-            if(newConnection != patchCableConnections[socket1][socket2]) {
-              if(newConnection) {
+            if(newConnectionReading != patchCableConnections[socket1][socket2]) {
+              if(newConnectionReading) {
                 // make connection
                 addPatchCable(socket1,socket2);
               } else {
@@ -187,7 +188,7 @@ void loop() {
                 removePatchCable(socket1,socket2);
               }
             }
-            patchCableConnections[socket1][socket2] = newConnection;
+            patchCableConnections[socket1][socket2] = newConnectionReading;
           }
         }
       }
