@@ -5,15 +5,15 @@
 #include <SerialFlash.h>
 
 #include "Module.h"
+#include "PatchCable.h"
 #include "Output.h"
 #include "VCO.h"
-#include "Mixer.h"
-#include "LFO.h"
-#include "PatchCable.h"
-#include "VCF.h"
-#include "Noise.h"
-#include "Envelope.h"
-#include "VCA.h"
+//#include "Mixer.h"
+//#include "LFO.h"
+//#include "VCF.h"
+//#include "Noise.h"
+//#include "Envelope.h"
+//#include "VCA.h"
 
 #define EMPTY_MODULE 0
 #define OUTPUT_MODULE 1
@@ -42,11 +42,16 @@ byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will ca
 boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 
 AudioControlSGTL5000 sgtl;
+AudioOutputI2S           mainOutput;           //xy=499,487
+
+Output outputModule(&mainOutput);
 
 void setup() {
 
+  Serial.begin(9600);
+
   // initialise audio board
-  AudioMemory(50);
+  AudioMemory(80);
   sgtl.enable();
   sgtl.volume(0.5);
 
@@ -59,8 +64,6 @@ void setup() {
   }
   pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
   pinMode(MODULE_ID_PIN, INPUT);
-  
-  Serial.begin(9600);
 
   // read module slots
   for(int a=0;a<MODULE_SLOTS;a++) {
@@ -81,12 +84,6 @@ void setup() {
       moduleIdReadings[a] = EMPTY_MODULE;
       moduleIdReadings[0] = OUTPUT_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
-      moduleIdReadings[2] = MIXER_MODULE;
-      moduleIdReadings[3] = LFO_MODULE;
-      moduleIdReadings[4] = VCF_MODULE;
-      moduleIdReadings[5] = VCA_MODULE;
-      moduleIdReadings[6] = LFO_MODULE;
-      moduleIdReadings[7] = ENVELOPE_MODULE;
     }
 
     switch(moduleIdReadings[a]) {
@@ -95,7 +92,8 @@ void setup() {
       break;
 
       case OUTPUT_MODULE:
-      modules[a] = new Output();
+      //modules[a] = new Output();
+      modules[a] = &outputModule;
       break;
 
       case VCO_MODULE:
@@ -103,33 +101,36 @@ void setup() {
       break;
 
       case MIXER_MODULE:
-      modules[a] = new Mixer();
+      //modules[a] = new Mixer();
       break;
 
       case LFO_MODULE:
-      modules[a] = new LFO();
+      //modules[a] = new LFO();
       break;
 
       case VCF_MODULE:
-      modules[a] = new VCF();
+      //modules[a] = new VCF();
       break;
 
       case VCA_MODULE:
-      modules[a] = new VCA();
+      //modules[a] = new VCA();
       break;
 
       case NOISE_MODULE:
-      modules[a] = new Noise();
+      //modules[a] = new Noise();
       break;
 
       case ENVELOPE_MODULE:
-      modules[a] = new Envelope();
+      //modules[a] = new Envelope();
       break;
 
       default:
       modules[a] = NULL;
     }
   }
+
+  AudioProcessorUsageMaxReset();
+  AudioMemoryUsageMaxReset();
 }
 
 void loop() {
@@ -172,11 +173,8 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              if(fakeConnection(socket1,socket2,1,2,5,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,3,4,7,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,7,1,5,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,6,4,1,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,1,1,0,0)) newConnectionReading = true;
+              //newConnectionReading = false;
             }
       
             if(newConnectionReading != patchCableConnections[socket1][socket2]) {
@@ -194,6 +192,8 @@ void loop() {
       }
     }
   }
+  Serial.println(AudioMemoryUsageMax());
+  Serial.println(AudioProcessorUsageMax());
 }
 
 void addPatchCable(int highSocket, int lowSocket) {
