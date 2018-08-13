@@ -8,12 +8,12 @@
 #include "PatchCable.h"
 #include "Master.h"
 #include "VCO.h"
-//#include "Mixer.h"
-//#include "LFO.h"
-//#include "VCF.h"
-//#include "Noise.h"
-//#include "Envelope.h"
-//#include "VCA.h"
+#include "Mixer.h"
+#include "LFO.h"
+#include "VCF.h"
+#include "Noise.h"
+#include "Envelope.h"
+#include "VCA.h"
 
 #define EMPTY_MODULE 0
 #define MASTER_MODULE 1
@@ -87,6 +87,8 @@ void setup() {
       moduleIdReadings[a] = EMPTY_MODULE;
       moduleIdReadings[0] = MASTER_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
+      moduleIdReadings[2] = MIXER_MODULE;
+      moduleIdReadings[3] = NOISE_MODULE;
     }
 
     for(int p=0;p<MAX_POLYPHONY;p++) {
@@ -104,27 +106,27 @@ void setup() {
         break;
   
         case MIXER_MODULE:
-        //modules[a][p] = new Mixer();
+        modules[a][p] = new Mixer();
         break;
   
         case LFO_MODULE:
-        //modules[a][p] = new LFO();
+        modules[a][p] = new LFO();
         break;
   
         case VCF_MODULE:
-        //modules[a][p] = new VCF();
+        modules[a][p] = new VCF();
         break;
   
         case VCA_MODULE:
-        //modules[a][p] = new VCA();
+        modules[a][p] = new VCA();
         break;
   
         case NOISE_MODULE:
-        //modules[a][p] = new Noise();
+        modules[a][p] = new Noise();
         break;
   
         case ENVELOPE_MODULE:
-        //modules[a][p] = new Envelope();
+        modules[a][p] = new Envelope();
         break;
   
         default:
@@ -183,8 +185,11 @@ void loop() {
 
             // testing code, overrides any actual connections
             if(true) {
-              if(fakeConnection(socket1,socket2,1,1,0,0)) newConnectionReading = true;
-              //newConnectionReading = false;
+              newConnectionReading = false;
+              if(fakeConnection(socket1,socket2,1,1,2,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,1,2,2,1)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,3,0,2,2)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,2,4,0,0)) newConnectionReading = true;
             }
       
             if(newConnectionReading != patchCableConnections[socket1][socket2]) {

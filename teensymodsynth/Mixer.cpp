@@ -3,6 +3,9 @@
 #include "Socket.h"
 
 Mixer::Mixer() {
+  for(int i=0;i<4;i++) {
+    _mixer.gain(i,0.1);
+  }
   sockets[0].setInput(_mixer, 0);
   sockets[1].setInput(_mixer, 1);
   sockets[2].setInput(_mixer, 2);
