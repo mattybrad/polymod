@@ -37,6 +37,8 @@ const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {17,20,21};
 const int SOCKET_SEND_MODULE_SELECT_PINS[] = {5,8,16};
 const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {24,25,26};
 
+const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
+
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
 byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
@@ -48,6 +50,7 @@ AudioMixer4 mainMixer;
 AudioConnection con1(mainMixer,0,mainOutput,0);
 AudioConnection con2(mainMixer,0,mainOutput,1);
 AudioConnection* masterConnections[MAX_POLYPHONY];
+Master masterModules[MAX_POLYPHONY];
 
 void setup() {
 
@@ -67,6 +70,11 @@ void setup() {
   }
   pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
   pinMode(MODULE_ID_PIN, INPUT);
+
+  // init temp keyboard pins
+  for(int i=0;i<5;i++) {
+    pinMode(KEYBOARD_PINS[i], INPUT_PULLUP);
+  }
 
   // read module slots
   for(int a=0;a<MODULE_SLOTS;a++) {
@@ -98,7 +106,8 @@ void setup() {
         break;
   
         case MASTER_MODULE:
-        modules[a][p] = new Master();
+        modules[a][p] = &masterModules[p];
+        masterConnections[p] = new AudioConnection(modules[a][p]->getMainOutput(),0,mainMixer,p);
         break;
   
         case VCO_MODULE:
@@ -135,10 +144,6 @@ void setup() {
     }
   }
 
-  for(int p=0;p<MAX_POLYPHONY;p++) {
-    masterConnections[p] = new AudioConnection(modules[0][p]->getMainOutput(),0,mainMixer,p);
-  }
-
   AudioProcessorUsageMaxReset();
   AudioMemoryUsageMaxReset();
 }
@@ -173,10 +178,6 @@ void loop() {
           int socket1 = a*8+b;
           int socket2 = c*8+d;
 
-          for(int p=0;p<MAX_POLYPHONY;p++) {
-            if(modules[d][p]) modules[d][p]->update();
-          }
-
           if(socket1 > socket2) {
             newConnectionReading = false;
             if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
@@ -188,7 +189,7 @@ void loop() {
               newConnectionReading = false;
               if(fakeConnection(socket1,socket2,1,1,2,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,1,2,2,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,3,0,2,2)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,2,4,0,0)) newConnectionReading = true;
             }
       
@@ -202,6 +203,15 @@ void loop() {
               }
             }
             patchCableConnections[socket1][socket2] = newConnectionReading;
+          }
+
+          // probably move this to dedicated keyboard class later
+          int notes[] = {8,15,20,-4};
+
+          for(int p=0;p<MAX_POLYPHONY;p++) {
+            if(!digitalRead(KEYBOARD_PINS[p])) notes[p] = 25 + 2 * p;
+            if(modules[a][p]) modules[a][p]->update();
+            if(a==0) masterModules[p].note = notes[p];
           }
         }
       }

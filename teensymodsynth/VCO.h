@@ -12,7 +12,7 @@ class VCO : public Module {
     AudioSynthWaveformModulated _square;
     AudioSynthWaveformModulated _triangle;
     AudioSynthWaveformModulated _sine;
-    AudioAmplifier _freqMod;
+    AudioMixer4 _freqMod;
     AudioConnection* _patchCable1;
     AudioConnection* _patchCable2;
     AudioConnection* _patchCable3;
