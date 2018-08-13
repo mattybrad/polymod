@@ -6,7 +6,7 @@
 
 #include "Module.h"
 #include "PatchCable.h"
-#include "Output.h"
+#include "Master.h"
 #include "VCO.h"
 //#include "Mixer.h"
 //#include "LFO.h"
@@ -16,7 +16,7 @@
 //#include "VCA.h"
 
 #define EMPTY_MODULE 0
-#define OUTPUT_MODULE 1
+#define MASTER_MODULE 1
 #define VCO_MODULE 2
 #define VCF_MODULE 3
 #define VCA_MODULE 4
@@ -25,6 +25,7 @@
 #define NOISE_MODULE 7
 #define ENVELOPE_MODULE 8
 
+#define MAX_POLYPHONY 4
 #define MODULE_SLOTS 8
 #define SOCKET_RECEIVE_DATA_PIN 27
 #define MODULE_ID_PIN 28
@@ -36,15 +37,17 @@ const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {17,20,21};
 const int SOCKET_SEND_MODULE_SELECT_PINS[] = {5,8,16};
 const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {24,25,26};
 
-Module *modules[MODULE_SLOTS]; // array of pointers to module instances
+Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
 byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
 boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 
 AudioControlSGTL5000 sgtl;
-AudioOutputI2S           mainOutput;           //xy=499,487
-
-Output outputModule(&mainOutput);
+AudioOutputI2S mainOutput;
+AudioMixer4 mainMixer;
+AudioConnection con1(mainMixer,0,mainOutput,0);
+AudioConnection con2(mainMixer,0,mainOutput,1);
+AudioConnection* masterConnections[MAX_POLYPHONY];
 
 void setup() {
 
@@ -82,51 +85,56 @@ void setup() {
     // test code, overrides actual readings
     if(true) {
       moduleIdReadings[a] = EMPTY_MODULE;
-      moduleIdReadings[0] = OUTPUT_MODULE;
+      moduleIdReadings[0] = MASTER_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
     }
 
-    switch(moduleIdReadings[a]) {
-      case EMPTY_MODULE:
-      modules[a] = NULL;
-      break;
-
-      case OUTPUT_MODULE:
-      //modules[a] = new Output();
-      modules[a] = &outputModule;
-      break;
-
-      case VCO_MODULE:
-      modules[a] = new VCO();
-      break;
-
-      case MIXER_MODULE:
-      //modules[a] = new Mixer();
-      break;
-
-      case LFO_MODULE:
-      //modules[a] = new LFO();
-      break;
-
-      case VCF_MODULE:
-      //modules[a] = new VCF();
-      break;
-
-      case VCA_MODULE:
-      //modules[a] = new VCA();
-      break;
-
-      case NOISE_MODULE:
-      //modules[a] = new Noise();
-      break;
-
-      case ENVELOPE_MODULE:
-      //modules[a] = new Envelope();
-      break;
-
-      default:
-      modules[a] = NULL;
+    for(int p=0;p<MAX_POLYPHONY;p++) {
+      switch(moduleIdReadings[a]) {
+        case EMPTY_MODULE:
+        modules[a][p] = NULL;
+        break;
+  
+        case MASTER_MODULE:
+        modules[a][p] = new Master();
+        break;
+  
+        case VCO_MODULE:
+        modules[a][p] = new VCO();
+        break;
+  
+        case MIXER_MODULE:
+        //modules[a][p] = new Mixer();
+        break;
+  
+        case LFO_MODULE:
+        //modules[a][p] = new LFO();
+        break;
+  
+        case VCF_MODULE:
+        //modules[a][p] = new VCF();
+        break;
+  
+        case VCA_MODULE:
+        //modules[a][p] = new VCA();
+        break;
+  
+        case NOISE_MODULE:
+        //modules[a][p] = new Noise();
+        break;
+  
+        case ENVELOPE_MODULE:
+        //modules[a][p] = new Envelope();
+        break;
+  
+        default:
+        modules[a][p] = NULL;
+      }
     }
+  }
+
+  for(int p=0;p<MAX_POLYPHONY;p++) {
+    masterConnections[p] = new AudioConnection(modules[0][p]->getMainOutput(),0,mainMixer,p);
   }
 
   AudioProcessorUsageMaxReset();
@@ -163,7 +171,9 @@ void loop() {
           int socket1 = a*8+b;
           int socket2 = c*8+d;
 
-          if(modules[d]) modules[d]->update();
+          for(int p=0;p<MAX_POLYPHONY;p++) {
+            if(modules[d][p]) modules[d][p]->update();
+          }
 
           if(socket1 > socket2) {
             newConnectionReading = false;
@@ -197,15 +207,17 @@ void loop() {
 }
 
 void addPatchCable(int highSocket, int lowSocket) {
-  int foundIndex = -1;
-  for(int i=0;i<MAX_CABLES&&foundIndex==-1;i++) {
-    if(patchCables[i]==NULL) foundIndex = i;
-  }
-  if(foundIndex >= 0) {
-    patchCables[foundIndex] = new PatchCable(highSocket, lowSocket, getSocket(highSocket), getSocket(lowSocket));
-    Serial.println("ADDED CABLE");
-  } else {
-    Serial.println("CAN'T ADD NEW CABLE");
+  for(int p=0;p<MAX_POLYPHONY;p++) {
+    int foundIndex = -1;
+    for(int i=0;i<MAX_CABLES&&foundIndex==-1;i++) {
+      if(patchCables[i]==NULL) foundIndex = i;
+    }
+    if(foundIndex >= 0) {
+      patchCables[foundIndex] = new PatchCable(highSocket, lowSocket, getSocket(highSocket, p), getSocket(lowSocket, p));
+      Serial.println("ADDED CABLE");
+    } else {
+      Serial.println("CAN'T ADD NEW CABLE");
+    }
   }
 }
 
@@ -224,12 +236,12 @@ void removePatchCable(int highSocket, int lowSocket) {
   }
 }
 
-Socket &getSocket(int socketNumber) {
+Socket &getSocket(int socketNumber, int polyIndex) {
   int moduleNumber = socketNumber / 8;
   int moduleSocketNumber = socketNumber % 8;
   Serial.println(moduleNumber);
   Serial.println(moduleSocketNumber);
-  return modules[moduleNumber]->getSocket(moduleSocketNumber);
+  return modules[moduleNumber][polyIndex]->getSocket(moduleSocketNumber);
 }
 
 boolean fakeConnection(int socket1, int socket2, int module1, int moduleSocket1, int module2, int moduleSocket2) {

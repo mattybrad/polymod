@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "Socket.h"
 #include "Control.h"
+#include <Audio.h>
 
 class Module {
   public:
@@ -13,6 +14,7 @@ class Module {
     Socket& getSocket(int moduleSocketNumber);
     void removePatchCable(int moduleSocketNumber);
     virtual void update() {};
+    virtual AudioAmplifier& getMainOutput() {};
   private:
     int _id;
     
