@@ -15,9 +15,9 @@ VCO::VCO() {
   _freqMod.gain(1, 0.2);
   sockets[0].setInput(_freqMod, 0); // main CV for note input
   sockets[1].setInput(_freqMod, 1); // attenuated CV for LFOs etc
-  sockets[1].setOutput(_saw, 0);
-  sockets[2].setOutput(_square, 0);
-  sockets[3].setOutput(_triangle, 0);
-  sockets[4].setOutput(_sine, 0);
+  sockets[2].setOutput(_saw, 0);
+  sockets[3].setOutput(_square, 0);
+  sockets[4].setOutput(_triangle, 0);
+  sockets[5].setOutput(_sine, 0);
   
 }

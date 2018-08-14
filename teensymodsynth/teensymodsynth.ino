@@ -42,7 +42,7 @@ const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
-KeyboardHandler keyboardHandler;
+KeyboardHandler keyboardHandler(MAX_POLYPHONY);
 byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
 boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 
@@ -59,9 +59,9 @@ void setup() {
   Serial.begin(9600);
 
   // initialise audio board
-  AudioMemory(80);
+  AudioMemory(300);
   sgtl.enable();
-  sgtl.volume(0.5);
+  sgtl.volume(0.8);
 
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
@@ -101,6 +101,7 @@ void setup() {
       moduleIdReadings[3] = VCA_MODULE;
       moduleIdReadings[4] = LFO_MODULE;
       moduleIdReadings[5] = VCF_MODULE;
+      moduleIdReadings[6] = ENVELOPE_MODULE;
     }
 
     for(int p=0;p<MAX_POLYPHONY;p++) {
@@ -191,10 +192,12 @@ void loop() {
             // testing code, overrides any actual connections
             if(true) {
               newConnectionReading = false;
-              if(fakeConnection(socket1,socket2,1,1,2,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,1,3,2,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,1,2,2,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,2,4,3,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,0,2,3,1)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,0,2,6,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,6,1,3,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,3,2,5,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,4,2,5,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
@@ -224,8 +227,10 @@ void loop() {
       }
     }
   }
-  Serial.println(AudioMemoryUsage());
-  Serial.println(AudioProcessorUsage());
+  Serial.print("MEM: ");
+  Serial.println(AudioMemoryUsageMax());
+  Serial.print("CPU: ");
+  Serial.println(AudioProcessorUsageMax());
 }
 
 void addPatchCable(int highSocket, int lowSocket) {

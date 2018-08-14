@@ -2,11 +2,10 @@
 #include "KeyboardHandler.h"
 
 const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
-const int MAX_POLYPHONY = 4;
 const int NUM_KEYS = 5;
 
-KeyboardHandler::KeyboardHandler() {
-  
+KeyboardHandler::KeyboardHandler(int polyphony) {
+  _polyphony = polyphony;
 }
 
 void KeyboardHandler::update() {
@@ -19,7 +18,7 @@ void KeyboardHandler::update() {
         // note pressed
         
         int bestChannel = -1;
-        for(int j=0;j<MAX_POLYPHONY;j++) {
+        for(int j=0;j<_polyphony;j++) {
           if(!_channels[j].noteOn) {
             // channel is free
             
@@ -43,9 +42,10 @@ void KeyboardHandler::update() {
         // note released
         _keyStatus[i] = false;
         
-        for(int j=0;j<MAX_POLYPHONY;j++) {
+        for(int j=0;j<_polyphony;j++) {
           if(_channels[j].note == i) {
             _channels[j].noteOn = false;
+            _channels[j].lastNoteOff = millis();
           }
         }
       }

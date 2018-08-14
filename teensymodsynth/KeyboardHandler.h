@@ -14,13 +14,14 @@ class KeyboardChannel {
 
 class KeyboardHandler {
   public:
-    KeyboardHandler();
+    KeyboardHandler(int polyphony);
     void update();
     int getNote(int channelIndex);
     boolean getGate(int channelIndex);
   private:
-    boolean _keyStatus[40];
-    KeyboardChannel _channels[4];
+    boolean _keyStatus[40]; // 40 keys as a rough guess for now
+    KeyboardChannel _channels[10]; // 10 channels just to be safe, unlikely to ever get that much polyphony
+    int _polyphony;
 };
 
 #endif
