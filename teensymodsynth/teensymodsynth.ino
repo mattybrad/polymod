@@ -99,6 +99,8 @@ void setup() {
       moduleIdReadings[1] = VCO_MODULE;
       moduleIdReadings[2] = MIXER_MODULE;
       moduleIdReadings[3] = VCA_MODULE;
+      moduleIdReadings[4] = LFO_MODULE;
+      moduleIdReadings[5] = VCF_MODULE;
     }
 
     for(int p=0;p<MAX_POLYPHONY;p++) {
@@ -193,7 +195,9 @@ void loop() {
               if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,2,4,3,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,0,2,3,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,3,2,0,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,3,2,5,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,4,2,5,1)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
             }
       
             if(newConnectionReading != patchCableConnections[socket1][socket2]) {
@@ -220,8 +224,8 @@ void loop() {
       }
     }
   }
-  Serial.println(AudioMemoryUsageMax());
-  Serial.println(AudioProcessorUsageMax());
+  Serial.println(AudioMemoryUsage());
+  Serial.println(AudioProcessorUsage());
 }
 
 void addPatchCable(int highSocket, int lowSocket) {

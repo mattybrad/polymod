@@ -3,7 +3,7 @@
 #include "Socket.h"
 
 VCF::VCF() {
-  float freq = 300;
+  float freq = 800;
   float Q = 0.9;
   _filter.frequency(freq);
   _filter.resonance(Q);
