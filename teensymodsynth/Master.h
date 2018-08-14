@@ -9,6 +9,7 @@ class Master : public Module {
     Master();
     AudioAmplifier& getMainOutput();
     int note;
+    boolean gate;
     virtual void update();
   private:
     AudioAmplifier _main;

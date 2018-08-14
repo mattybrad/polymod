@@ -6,6 +6,7 @@
 
 #include "Module.h"
 #include "PatchCable.h"
+#include "KeyboardHandler.h"
 #include "Master.h"
 #include "VCO.h"
 #include "Mixer.h"
@@ -41,6 +42,7 @@ const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
+KeyboardHandler keyboardHandler;
 byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
 boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
 
@@ -96,7 +98,7 @@ void setup() {
       moduleIdReadings[0] = MASTER_MODULE;
       moduleIdReadings[1] = VCO_MODULE;
       moduleIdReadings[2] = MIXER_MODULE;
-      moduleIdReadings[3] = NOISE_MODULE;
+      moduleIdReadings[3] = VCA_MODULE;
     }
 
     for(int p=0;p<MAX_POLYPHONY;p++) {
@@ -188,9 +190,10 @@ void loop() {
             if(true) {
               newConnectionReading = false;
               if(fakeConnection(socket1,socket2,1,1,2,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,1,2,2,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,2,4,0,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,2,4,3,0)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,0,2,3,1)) newConnectionReading = true;
+              if(fakeConnection(socket1,socket2,3,2,0,0)) newConnectionReading = true;
             }
       
             if(newConnectionReading != patchCableConnections[socket1][socket2]) {
@@ -205,13 +208,13 @@ void loop() {
             patchCableConnections[socket1][socket2] = newConnectionReading;
           }
 
-          // probably move this to dedicated keyboard class later
-          int notes[] = {8,15,20,-4};
-
+          keyboardHandler.update();
           for(int p=0;p<MAX_POLYPHONY;p++) {
-            if(!digitalRead(KEYBOARD_PINS[p])) notes[p] = 25 + 2 * p;
             if(modules[a][p]) modules[a][p]->update();
-            if(a==0) masterModules[p].note = notes[p];
+            if(a==0) {
+              masterModules[p].note = keyboardHandler.getNote(p);
+              masterModules[p].gate = keyboardHandler.getGate(p);
+            }
           }
         }
       }

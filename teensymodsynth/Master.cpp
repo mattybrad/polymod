@@ -3,6 +3,7 @@
 
 Master::Master() {
   note = 20;
+  gate = false;
   sockets[0].setInput(_main, 0);
   sockets[1].setOutput(_keyboardCV, 0);
   sockets[2].setOutput(_keyboardGate, 0);
@@ -13,6 +14,7 @@ AudioAmplifier& Master::getMainOutput() {
 }
 
 void Master::update() {
+  _keyboardGate.amplitude(gate?1:0);
   _keyboardCV.amplitude(((float) (note-20)) * 1/8/12);
 }
 
