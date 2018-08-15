@@ -5,8 +5,10 @@
 class Control {
   public:
     Control();
+    void update();
+    int value;
   private:
-    int _rawValue;
+    
 };
 
 #endif

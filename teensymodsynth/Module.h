@@ -14,6 +14,7 @@ class Module {
     Socket& getSocket(int moduleSocketNumber);
     void removePatchCable(int moduleSocketNumber);
     virtual void update() {};
+    void updateControlValue(int controlIndex, int controlReading);
     virtual AudioAmplifier& getMainOutput() {};
   private:
     int _id;

@@ -7,6 +7,7 @@
 class VCF : public Module {
   public:
     VCF();
+    virtual void update();
   private:
     AudioFilterStateVariable _filter;
 };

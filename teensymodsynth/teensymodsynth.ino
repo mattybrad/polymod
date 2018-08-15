@@ -102,6 +102,7 @@ void setup() {
       moduleIdReadings[4] = LFO_MODULE;
       moduleIdReadings[5] = VCF_MODULE;
       moduleIdReadings[6] = ENVELOPE_MODULE;
+      moduleIdReadings[7] = ENVELOPE_MODULE;
     }
 
     for(int p=0;p<MAX_POLYPHONY;p++) {
@@ -197,9 +198,11 @@ void loop() {
               if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,2,4,3,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,0,2,6,0)) newConnectionReading = true;
+              //if(fakeConnection(socket1,socket2,0,2,7,0)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,6,1,3,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,3,2,5,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,4,2,5,1)) newConnectionReading = true;
+              //if(fakeConnection(socket1,socket2,4,2,5,1)) newConnectionReading = true;
+              //if(fakeConnection(socket1,socket2,7,1,5,1)) newConnectionReading = true;
               if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
             }
       
@@ -215,9 +218,15 @@ void loop() {
             patchCableConnections[socket1][socket2] = newConnectionReading;
           }
 
+          int controlReading = analogRead(ANALOG_DATA_PIN); // inefficient, reads even if not being used, optimise later
           keyboardHandler.update();
           for(int p=0;p<MAX_POLYPHONY;p++) {
-            if(modules[a][p]) modules[a][p]->update();
+            if(modules[c][p]) {
+              modules[c][p]->updateControlValue(d,controlReading);
+            }
+            if(modules[a][p]) {
+              modules[a][p]->update();
+            }
             if(a==0) {
               masterModules[p].note = keyboardHandler.getNote(p);
               masterModules[p].gate = keyboardHandler.getGate(p);
@@ -227,10 +236,10 @@ void loop() {
       }
     }
   }
-  Serial.print("MEM: ");
-  Serial.println(AudioMemoryUsageMax());
-  Serial.print("CPU: ");
-  Serial.println(AudioProcessorUsageMax());
+  //Serial.print("MEM: ");
+  //Serial.println(AudioMemoryUsageMax());
+  //Serial.print("CPU: ");
+  //Serial.println(AudioProcessorUsageMax());
 }
 
 void addPatchCable(int highSocket, int lowSocket) {
