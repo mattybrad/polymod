@@ -4,9 +4,7 @@
 
 Envelope::Envelope() {
   _dc.amplitude(1.0);
-  _envelope.attack(1000);
-  _envelope.decay(1000);
-  _envelope.sustain(0.4);
+  _envelope.attack(2000);
   _envelope.release(3000);
   _patchCable1 = new AudioConnection(_dc,0,_envelope,0);
   _queue.begin();

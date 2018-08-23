@@ -1,8 +1,9 @@
 #include "Arduino.h"
 #include "KeyboardHandler.h"
 
-const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
+//const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
 const int NUM_KEYS = 5;
+const int TEMP_SCALE[] = {0,2,4,5,7};
 
 KeyboardHandler::KeyboardHandler(int polyphony) {
   _polyphony = polyphony;
@@ -10,7 +11,8 @@ KeyboardHandler::KeyboardHandler(int polyphony) {
 
 void KeyboardHandler::update() {
   for(int i=0;i<NUM_KEYS;i++) {
-    boolean keyDown = !digitalRead(KEYBOARD_PINS[i]);
+    //boolean keyDown = !digitalRead(KEYBOARD_PINS[i]);
+    boolean keyDown = false;
     if(_keyStatus[i] != keyDown) {
       // key has changed
 
@@ -55,7 +57,7 @@ void KeyboardHandler::update() {
 }
 
 int KeyboardHandler::getNote(int channelIndex) {
-  return _channels[channelIndex].note * 2 + 24;
+  return TEMP_SCALE[_channels[channelIndex].note] + 24;
 }
 
 boolean KeyboardHandler::getGate(int channelIndex) {

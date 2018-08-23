@@ -28,17 +28,17 @@
 
 #define MAX_POLYPHONY 4
 #define MODULE_SLOTS 8
-#define SOCKET_RECEIVE_DATA_PIN 27
-#define MODULE_ID_PIN 28
-#define ANALOG_DATA_PIN 33
+#define SOCKET_RECEIVE_DATA_PIN 25
+#define MODULE_ID_PIN 26
+#define ANALOG_DATA_PIN 21
 #define MAX_CABLES 100
 const int NUM_SOCKETS = MODULE_SLOTS * 8;
-const int SOCKET_SEND_ROOT_SELECT_PINS[] = {2,3,4};
-const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {17,20,21};
-const int SOCKET_SEND_MODULE_SELECT_PINS[] = {5,8,16};
-const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {24,25,26};
+const int SOCKET_SEND_ROOT_SELECT_PINS[] = {30,31,32};
+const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {2,3,4}; // C
+const int SOCKET_SEND_MODULE_SELECT_PINS[] = {33,34,35};
+const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {27,28,29};
 
-const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
+//const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
@@ -75,7 +75,7 @@ void setup() {
 
   // init temp keyboard pins
   for(int i=0;i<5;i++) {
-    pinMode(KEYBOARD_PINS[i], INPUT_PULLUP);
+    //pinMode(KEYBOARD_PINS[i], INPUT_PULLUP);
   }
 
   // read module slots
@@ -219,6 +219,8 @@ void loop() {
           }
 
           int controlReading = analogRead(ANALOG_DATA_PIN); // inefficient, reads even if not being used, optimise later
+          // also this analog read business seems to be increasing latency a fair bit
+          // maybe move things around so this happens after note triggering
           keyboardHandler.update();
           for(int p=0;p<MAX_POLYPHONY;p++) {
             if(modules[c][p]) {

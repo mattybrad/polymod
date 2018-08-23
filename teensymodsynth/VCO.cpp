@@ -3,7 +3,7 @@
 #include "Socket.h"
 
 VCO::VCO() {
-  float freq = 60;
+  float freq = 87.31;
   _patchCable1 = new AudioConnection(_freqMod, 0, _saw, 0);
   _patchCable2 = new AudioConnection(_freqMod, 0, _square, 0);
   _patchCable3 = new AudioConnection(_freqMod, 0, _triangle, 0);
