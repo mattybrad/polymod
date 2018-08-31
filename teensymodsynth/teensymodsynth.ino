@@ -235,6 +235,7 @@ void loop() {
             if(modules[c][p]) {
               modules[c][p]->updateControlValue(d,controlReading);
             }
+            // may need to do this update more frequently somehow
             if(modules[a][p]) {
               modules[a][p]->update();
             }

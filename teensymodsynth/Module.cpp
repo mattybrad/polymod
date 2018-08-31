@@ -18,6 +18,7 @@ void Module::removePatchCable(int moduleSocketNumber) {
 }
 
 void Module::updateControlValue(int controlIndex, int controlReading) {
-  controls[controlIndex].value = controlReading;
+  controls[controlIndex].rawValue = controlReading;
+  controls[controlIndex].updateSmoothedValue();
 }
 

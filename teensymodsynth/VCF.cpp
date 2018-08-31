@@ -17,7 +17,7 @@ VCF::VCF() {
 }
 
 void VCF::update() {
-  float freqVal = ((float) controls[0].value)/1023.0;
+  float freqVal = controls[0].getSmoothedValue();
   _filter.frequency(freqVal*freqVal*4000);
 }
 

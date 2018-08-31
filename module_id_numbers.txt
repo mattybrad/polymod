@@ -1,9 +1,0 @@
-0	empty
-1	vco
-2	vca
-3	lfo
-4	adsr
-5	noise / sample and hold
-6	vcf
-7	mixer
-255	master

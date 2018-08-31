@@ -5,9 +5,11 @@
 class Control {
   public:
     Control();
-    int value;
+    int rawValue;
+    void updateSmoothedValue();
+    float getSmoothedValue();
   private:
-    
+    float _smoothedValue = 0.0;
 };
 
 #endif

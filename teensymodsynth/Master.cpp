@@ -16,7 +16,7 @@ AudioAmplifier& Master::getMainOutput() {
 void Master::update() {
   _keyboardGate.amplitude(gate?1:0);
   _keyboardCV.amplitude(((float) (note-20)) * 1/8/12);
-  float vol = ((float) controls[0].value)/1023.0;
+  float vol = controls[0].getSmoothedValue();
   _main.gain(vol*vol);
 }
 

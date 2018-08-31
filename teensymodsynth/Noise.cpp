@@ -8,7 +8,7 @@ Noise::Noise() {
 }
 
 void Noise::update() {
-  float vol = ((float) controls[4].value)/1023.0;
+  float vol = controls[4].getSmoothedValue();
   _noise.amplitude(vol * vol);
 }
 

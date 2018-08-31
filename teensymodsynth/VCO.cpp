@@ -23,10 +23,10 @@ VCO::VCO() {
 
 void VCO::update() {
   int rangeCoeff;
-  bitWrite(rangeCoeff, map(controls[4].value, 0, 1023, 0, 6), 1);
-  float freq = ((float) controls[6].value)/1023.0;
-  float cv = ((float) controls[7].value)/1023.0;
-  float finalFreq = 32 * rangeCoeff + 100 * freq;
+  bitWrite(rangeCoeff, map(controls[4].rawValue, 0, 1023, 0, 8), 1);
+  float freqCoeff = controls[6].getSmoothedValue();
+  float cv = controls[7].getSmoothedValue();
+  float finalFreq = 16 * rangeCoeff * (0.5 + 1.5 * freqCoeff);
   _saw.frequency(finalFreq);
   _square.frequency(finalFreq);
   _triangle.frequency(finalFreq);
