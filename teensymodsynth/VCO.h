@@ -7,6 +7,7 @@
 class VCO : public Module {
   public:
     VCO();
+    virtual void update();
   private:
     AudioSynthWaveformModulated _saw;
     AudioSynthWaveformModulated _square;

@@ -5,7 +5,6 @@
 class Control {
   public:
     Control();
-    void update();
     int value;
   private:
     

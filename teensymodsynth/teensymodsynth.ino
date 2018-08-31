@@ -64,7 +64,7 @@ void setup() {
   // initialise audio board
   AudioMemory(300);
   sgtl.enable();
-  sgtl.volume(0.8);
+  sgtl.volume(0.2);
 
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
@@ -94,6 +94,8 @@ void setup() {
       delayMicroseconds(MULTIPLEXER_DELAY);
       bitWrite(moduleIdReadings[a],b,!digitalRead(MODULE_ID_PIN));
     }
+
+    moduleIdReadings[7] = MASTER_MODULE;
 
     // test code, overrides actual readings
     if(false) {
@@ -163,7 +165,7 @@ void loop() {
 
   boolean newConnectionReading;
   for(int a=0;a<8;a++) {
-    // switch the root socket send channel (set which module to send a 0V signal to)
+    // switch the root socket send channel (set which module to send a 3.3V signal to)
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[0],bitRead(a,0));
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[1],bitRead(a,1));
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[2],bitRead(a,2));
@@ -191,7 +193,7 @@ void loop() {
 
           delayMicroseconds(MULTIPLEXER_DELAY);
 
-          if(socket1 > socket2) {
+          if(socket1 < socket2) {
             newConnectionReading = false;
             if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
               newConnectionReading = true;
