@@ -26,8 +26,8 @@
 #define VCF_MODULE 6
 #define MIXER_MODULE 7
 
-#define MULTIPLEXER_DELAY 10
-#define MAX_POLYPHONY 4
+#define MULTIPLEXER_DELAY 5 // can probably go as low as 3 but best to be safe, latency not affected too much
+#define MAX_POLYPHONY 1
 #define MODULE_SLOTS 8
 #define SOCKET_RECEIVE_DATA_PIN 25
 #define MODULE_ID_PIN 26
@@ -163,6 +163,8 @@ void setup() {
 
 void loop() {
 
+  int loopStart = millis();
+
   boolean newConnectionReading;
   for(int a=0;a<8;a++) {
     // switch the root socket send channel (set which module to send a 3.3V signal to)
@@ -227,17 +229,16 @@ void loop() {
             patchCableConnections[socket1][socket2] = newConnectionReading;
           }
 
-          int controlReading = analogRead(ANALOG_DATA_PIN); // inefficient, reads even if not being used, optimise later
-          // also this analog read business seems to be increasing latency a fair bit
-          // maybe move things around so this happens after note triggering
+          int controlReading = analogRead(ANALOG_DATA_PIN); // could reduce latency by only doing a control reading when a module is using that channel
           keyboardHandler.update();
           for(int p=0;p<MAX_POLYPHONY;p++) {
             if(modules[c][p]) {
               modules[c][p]->updateControlValue(d,controlReading);
             }
-            // may need to do this update more frequently somehow
-            if(modules[a][p]) {
-              modules[a][p]->update();
+            for(int m=0;m<8;m++) {
+              if(modules[m][p]) {
+                modules[m][p]->update();
+              }
             }
             if(a==0) {
               masterModules[p].note = keyboardHandler.getNote(p);
@@ -252,6 +253,8 @@ void loop() {
   //Serial.println(AudioMemoryUsageMax());
   //Serial.print("CPU: ");
   //Serial.println(AudioProcessorUsageMax());
+
+  Serial.println(millis() - loopStart);
 }
 
 void addPatchCable(int highSocket, int lowSocket) {
