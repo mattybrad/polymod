@@ -64,7 +64,7 @@ void setup() {
   // initialise audio board
   AudioMemory(300);
   sgtl.enable();
-  sgtl.volume(0.2);
+  sgtl.volume(0.3);
 
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
@@ -249,12 +249,20 @@ void loop() {
       }
     }
   }
+
+  boolean anyCablesInvalid = false;
+  for(int i=0;i<MAX_CABLES;i++) {
+    if(patchCables[i]!=NULL) {
+      if(!patchCables[i]->isValid()) anyCablesInvalid = true;
+    }
+  }
+  // light an LED to indicate bad patch cable wiring
+  
   //Serial.print("MEM: ");
   //Serial.println(AudioMemoryUsageMax());
   //Serial.print("CPU: ");
   //Serial.println(AudioProcessorUsageMax());
-
-  Serial.println(millis() - loopStart);
+  //Serial.println(millis() - loopStart);
 }
 
 void addPatchCable(int highSocket, int lowSocket) {

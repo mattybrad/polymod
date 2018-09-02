@@ -39,3 +39,7 @@ void PatchCable::disconnect() {
   if(_valid) _audioConnection->disconnect();
 }
 
+boolean PatchCable::isValid() {
+  return _valid;
+}
+
