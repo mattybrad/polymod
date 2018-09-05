@@ -7,12 +7,19 @@
 class LFO : public Module {
   public:
     LFO();
+    virtual void update();
   private:
-    AudioSynthWaveform _saw;
-    AudioSynthWaveform _inverseSaw;
-    AudioSynthWaveform _sine;
-    AudioSynthWaveform _triangle;
-    AudioSynthWaveform _square;
+    AudioSynthWaveformModulated _saw;
+    AudioSynthWaveformModulated _inverseSaw;
+    AudioSynthWaveformModulated _sine;
+    AudioSynthWaveformModulated _triangle;
+    AudioSynthWaveformModulated _square;
+    AudioAmplifier _freqMod;
+    AudioConnection* _patchCable1;
+    AudioConnection* _patchCable2;
+    AudioConnection* _patchCable3;
+    AudioConnection* _patchCable4;
+    AudioConnection* _patchCable5;
 };
 
 #endif

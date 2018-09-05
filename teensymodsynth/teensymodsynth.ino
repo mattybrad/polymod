@@ -27,7 +27,7 @@
 #define MIXER_MODULE 7
 
 #define MULTIPLEXER_DELAY 5 // can probably go as low as 3 but best to be safe, latency not affected too much
-#define MAX_POLYPHONY 4
+#define MAX_POLYPHONY 1
 #define MODULE_SLOTS 8
 #define NUM_KEYBOARD_MULTIPLEXERS 4
 #define SOCKET_RECEIVE_DATA_PIN 25
