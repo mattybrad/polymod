@@ -5,8 +5,8 @@ Master::Master() {
   note = 20;
   gate = false;
   sockets[4].setInput(_main, 0);
-  sockets[1].setOutput(_keyboardCV, 0);
-  sockets[2].setOutput(_keyboardGate, 0);
+  sockets[6].setOutput(_keyboardCV, 0);
+  sockets[7].setOutput(_keyboardGate, 0);
 }
 
 AudioAmplifier& Master::getMainOutput() {

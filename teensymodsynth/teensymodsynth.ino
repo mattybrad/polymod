@@ -27,8 +27,9 @@
 #define MIXER_MODULE 7
 
 #define MULTIPLEXER_DELAY 5 // can probably go as low as 3 but best to be safe, latency not affected too much
-#define MAX_POLYPHONY 1
+#define MAX_POLYPHONY 4
 #define MODULE_SLOTS 8
+#define NUM_KEYBOARD_MULTIPLEXERS 4
 #define SOCKET_RECEIVE_DATA_PIN 25
 #define MODULE_ID_PIN 26
 #define ANALOG_DATA_PIN 21
@@ -38,8 +39,7 @@ const int SOCKET_SEND_ROOT_SELECT_PINS[] = {30,31,32}; // A
 const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {2,3,4}; // C
 const int SOCKET_SEND_MODULE_SELECT_PINS[] = {33,34,35}; // B
 const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {27,29,28}; // D
-
-//const int KEYBOARD_PINS[] = {6,7,10,12,14}; // temporary pins for reading notes
+const int KEYBOARD_PINS[NUM_KEYBOARD_MULTIPLEXERS] = {36,37,38,39}; // pins for reading notes
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
@@ -76,9 +76,9 @@ void setup() {
   pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
   pinMode(MODULE_ID_PIN, INPUT_PULLUP);
 
-  // init temp keyboard pins
-  for(int i=0;i<5;i++) {
-    //pinMode(KEYBOARD_PINS[i], INPUT_PULLUP);
+  // init keyboard pins
+  for(int i=0;i<NUM_KEYBOARD_MULTIPLEXERS;i++) {
+    pinMode(KEYBOARD_PINS[i], INPUT_PULLUP);
   }
 
   // read module slots
@@ -230,6 +230,10 @@ void loop() {
           }
 
           int controlReading = analogRead(ANALOG_DATA_PIN); // could reduce latency by only doing a control reading when a module is using that channel
+          keyboardHandler.setKey(d,   !digitalRead(KEYBOARD_PINS[0]));
+          keyboardHandler.setKey(d+8, !digitalRead(KEYBOARD_PINS[1]));
+          keyboardHandler.setKey(d+16,!digitalRead(KEYBOARD_PINS[2]));
+          keyboardHandler.setKey(d+24,!digitalRead(KEYBOARD_PINS[3]));
           keyboardHandler.update();
           for(int p=0;p<MAX_POLYPHONY;p++) {
             if(modules[c][p]) {
