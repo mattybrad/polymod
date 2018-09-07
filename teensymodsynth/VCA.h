@@ -7,8 +7,13 @@
 class VCA : public Module {
   public:
     VCA();
+    virtual void update();
   private:
-    AudioEffectMultiply _vca;
+    AudioMixer4 _cvMixer;
+    AudioMixer4 _inputMixer;
+    AudioEffectMultiply _multiplier;
+    AudioConnection* _patchCable1;
+    AudioConnection* _patchCable2;
 };
 
 #endif
