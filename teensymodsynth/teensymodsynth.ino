@@ -1,4 +1,4 @@
-#include <Audio.h>
+ #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -15,6 +15,7 @@
 #include "Noise.h"
 #include "Envelope.h"
 #include "VCA.h"
+#include "Crusher.h"
 
 #define EMPTY_MODULE 0
 #define MASTER_MODULE 255
@@ -25,9 +26,10 @@
 #define NOISE_MODULE 5
 #define VCF_MODULE 6
 #define MIXER_MODULE 7
+#define CRUSHER_MODULE 8
 
 #define MULTIPLEXER_DELAY 5 // can probably go as low as 3 but best to be safe, latency not affected too much
-#define MAX_POLYPHONY 1
+#define MAX_POLYPHONY 4
 #define MODULE_SLOTS 8
 #define NUM_KEYBOARD_MULTIPLEXERS 4
 #define SOCKET_RECEIVE_DATA_PIN 25
@@ -38,7 +40,7 @@ const int NUM_SOCKETS = MODULE_SLOTS * 8;
 const int SOCKET_SEND_ROOT_SELECT_PINS[] = {30,31,32}; // A
 const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {2,3,4}; // C
 const int SOCKET_SEND_MODULE_SELECT_PINS[] = {33,34,35}; // B
-const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {27,29,28}; // D
+const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {27,28,29}; // D
 const int KEYBOARD_PINS[NUM_KEYBOARD_MULTIPLEXERS] = {36,37,38,39}; // pins for reading notes
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
@@ -150,6 +152,10 @@ void setup() {
         case ENVELOPE_MODULE:
         modules[a][p] = new Envelope();
         break;
+
+        case CRUSHER_MODULE:
+        modules[a][p] = new Crusher();
+        break;
   
         default:
         modules[a][p] = NULL;
@@ -230,6 +236,7 @@ void loop() {
           }
 
           int controlReading = analogRead(ANALOG_DATA_PIN); // could reduce latency by only doing a control reading when a module is using that channel
+          //int controlReading = 512;
           keyboardHandler.setKey(d,   !digitalRead(KEYBOARD_PINS[0]));
           keyboardHandler.setKey(d+8, !digitalRead(KEYBOARD_PINS[1]));
           keyboardHandler.setKey(d+16,!digitalRead(KEYBOARD_PINS[2]));
@@ -244,7 +251,7 @@ void loop() {
                 modules[m][p]->update();
               }
             }
-            if(a==0) {
+            if(true) {
               masterModules[p].note = keyboardHandler.getNote(p);
               masterModules[p].gate = keyboardHandler.getGate(p);
             }
