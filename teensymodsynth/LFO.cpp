@@ -10,7 +10,7 @@ LFO::LFO() {
   _patchCable4 = new AudioConnection(_freqMod, 0, _sine, 0);
   _patchCable5 = new AudioConnection(_freqMod, 0, _inverseSaw, 0);
   _saw.begin(1.0,freq,WAVEFORM_SAWTOOTH);
-  _inverseSaw.begin(1.0,freq,WAVEFORM_SAWTOOTH_REVERSE);
+  _inverseSaw.begin(1.0,freq,WAVEFORM_SAMPLE_HOLD);
   _sine.begin(1.0,freq,WAVEFORM_SINE);
   _triangle.begin(1.0,freq,WAVEFORM_TRIANGLE);
   _square.begin(1.0,freq,WAVEFORM_SQUARE);

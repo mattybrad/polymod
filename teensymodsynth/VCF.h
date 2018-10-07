@@ -10,6 +10,8 @@ class VCF : public Module {
     virtual void update();
   private:
     AudioFilterStateVariable _filter;
+    AudioMixer4 _cvMixer;
+    AudioConnection* _patchCable1;
 };
 
 #endif

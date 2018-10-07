@@ -13,7 +13,9 @@ Crusher::Crusher() {
 
 void Crusher::update() {
   // to do: use queues to add cv control
-  // to do: make params non linear so the interesting FX fade in apparently linearly
-  _bitcrusher.sampleRate(44100*controls[4].getSmoothedValue());
-  _bitcrusher.bits(1+15*controls[7].getSmoothedValue());
+  
+  float f = controls[4].getSmoothedValue();
+  float b = controls[7].getSmoothedValue();
+  _bitcrusher.sampleRate(44100*f*f*f);
+  _bitcrusher.bits(1+15*b*b);
 }
