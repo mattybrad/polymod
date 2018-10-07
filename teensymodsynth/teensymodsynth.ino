@@ -69,8 +69,8 @@ void setup() {
   // initialise audio board
   AudioMemory(300);
   sgtl.enable();
-  sgtl.volume(0.1);
-  sgtl.lineOutLevel(31);
+  sgtl.volume(0.5);
+  //sgtl.lineOutLevel(31);
 
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
@@ -261,9 +261,10 @@ void loop() {
     // set polyphony according to toggle switch
     polyphony = digitalRead(POLYPHONY_TOGGLE_PIN) ? MAX_POLYPHONY : 1;
     keyboardHandler.setPolyphony(polyphony);
-    mainMixer.gain(1,polyphony>1);
-    mainMixer.gain(2,polyphony>1);
-    mainMixer.gain(3,polyphony>1);
+    mainMixer.gain(0,polyphony>1?0.3:0.6);
+    mainMixer.gain(1,polyphony>1?0.3:0);
+    mainMixer.gain(2,polyphony>1?0.3:0);
+    mainMixer.gain(3,polyphony>1?0.3:0);
 
     // light an LED to indicate bad patch cable wiring
     if(anyCablesInvalid) {

@@ -10,6 +10,7 @@ class Noise : public Module {
     virtual void update();
   private:
     AudioSynthNoiseWhite _noise;
+    AudioSynthWaveform _sampleHold;
 };
 
 #endif
