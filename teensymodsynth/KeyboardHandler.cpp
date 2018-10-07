@@ -1,7 +1,11 @@
 #include "Arduino.h"
 #include "KeyboardHandler.h"
 
-KeyboardHandler::KeyboardHandler(int polyphony) {
+KeyboardHandler::KeyboardHandler() {
+  
+}
+
+void KeyboardHandler::setPolyphony(int polyphony) {
   _polyphony = polyphony;
 }
 
@@ -16,8 +20,6 @@ void KeyboardHandler::update() {
 
       if(_keyStatus[i]) {
         // note pressed
-        Serial.print("note pressed: ");
-        Serial.println(i);
         
         int bestChannel = -1;
         for(int j=0;j<_polyphony;j++) {
@@ -38,14 +40,11 @@ void KeyboardHandler::update() {
           _channels[bestChannel].note = i;
           _channels[bestChannel].noteOn = true;
         } else {
-          Serial.println("can't find channel");
+          // can't find channel
         }
         
       } else {
         // note released
-
-        Serial.print("note released: ");
-        Serial.println(i);
         
         for(int j=0;j<_polyphony;j++) {
           if(_channels[j].note == i) {

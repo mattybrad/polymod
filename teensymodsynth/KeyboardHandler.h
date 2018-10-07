@@ -14,8 +14,9 @@ class KeyboardChannel {
 
 class KeyboardHandler {
   public:
-    KeyboardHandler(int polyphony);
+    KeyboardHandler();
     void update();
+    void setPolyphony(int polyphony);
     void setKey(int keyNum, boolean keyDown);
     int getNote(int channelIndex);
     boolean getGate(int channelIndex);
@@ -23,7 +24,7 @@ class KeyboardHandler {
     boolean _keyStatus[32];
     boolean _prevKeyStatus[32];
     KeyboardChannel _channels[10]; // 10 channels just to be safe, unlikely to ever get that much polyphony
-    int _polyphony;
+    int _polyphony = 1;
 };
 
 #endif

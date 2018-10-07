@@ -7,7 +7,7 @@ VCF::VCF() {
   float Q = 0.9;
   _filter.frequency(freq);
   _filter.resonance(Q);
-  //_filter.octaveControl(2);
+  _filter.octaveControl(8);
   
   sockets[6].setInput(_filter, 0); // input
   sockets[4].setInput(_filter, 1); // freq CV

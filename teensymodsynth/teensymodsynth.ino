@@ -35,6 +35,8 @@
 #define SOCKET_RECEIVE_DATA_PIN 25
 #define MODULE_ID_PIN 26
 #define ANALOG_DATA_PIN 21
+#define ERROR_LED_PIN 5
+#define POLYPHONY_TOGGLE_PIN 8
 #define MAX_CABLES 100
 const int NUM_SOCKETS = MODULE_SLOTS * 8;
 const int SOCKET_SEND_ROOT_SELECT_PINS[] = {30,31,32}; // A
@@ -42,12 +44,15 @@ const int SOCKET_RECEIVE_ROOT_SELECT_PINS[] = {2,3,4}; // C
 const int SOCKET_SEND_MODULE_SELECT_PINS[] = {33,34,35}; // B
 const int SOCKET_RECEIVE_MODULE_SELECT_PINS[] = {27,28,29}; // D
 const int KEYBOARD_PINS[NUM_KEYBOARD_MULTIPLEXERS] = {36,37,38,39}; // pins for reading notes
+const int ERROR_LED_FLASH_CYCLES = 4;
 
 Module *modules[MODULE_SLOTS][MAX_POLYPHONY]; // array of pointers to module instances
 PatchCable *patchCables[MAX_CABLES];
-KeyboardHandler keyboardHandler(MAX_POLYPHONY);
+KeyboardHandler keyboardHandler;
 byte moduleIdReadings[MODULE_SLOTS]; // readings of module IDs - changes will causes program to update module listing
 boolean patchCableConnections[NUM_SOCKETS][NUM_SOCKETS];
+int polyphony = MAX_POLYPHONY;
+int errorLedCycles = 0;
 
 AudioControlSGTL5000 sgtl;
 AudioOutputI2S mainOutput;
@@ -61,12 +66,11 @@ void setup() {
 
   Serial.begin(9600);
 
-  delay(3000);
-
   // initialise audio board
   AudioMemory(300);
   sgtl.enable();
-  sgtl.volume(0.3);
+  sgtl.volume(0.1);
+  sgtl.lineOutLevel(31);
 
   // initialise mux/demux pins
   for(int i=0;i<3;i++) {
@@ -77,6 +81,8 @@ void setup() {
   }
   pinMode(SOCKET_RECEIVE_DATA_PIN, INPUT);
   pinMode(MODULE_ID_PIN, INPUT_PULLUP);
+  pinMode(ERROR_LED_PIN, OUTPUT);
+  pinMode(POLYPHONY_TOGGLE_PIN, INPUT_PULLUP);
 
   // init keyboard pins
   for(int i=0;i<NUM_KEYBOARD_MULTIPLEXERS;i++) {
@@ -173,6 +179,7 @@ void loop() {
 
   boolean newConnectionReading;
   for(int a=0;a<8;a++) {
+    
     // switch the root socket send channel (set which module to send a 3.3V signal to)
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[0],bitRead(a,0));
     digitalWrite(SOCKET_SEND_ROOT_SELECT_PINS[1],bitRead(a,1));
@@ -205,22 +212,6 @@ void loop() {
             newConnectionReading = false;
             if(digitalRead(SOCKET_RECEIVE_DATA_PIN)) {
               newConnectionReading = true;
-            }
-
-            // testing code, overrides any actual connections
-            if(false) {
-              newConnectionReading = false;
-              if(fakeConnection(socket1,socket2,1,3,2,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,1,2,2,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,0,1,1,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,2,4,3,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,0,2,6,0)) newConnectionReading = true;
-              //if(fakeConnection(socket1,socket2,0,2,7,0)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,6,1,3,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,3,2,5,0)) newConnectionReading = true;
-              //if(fakeConnection(socket1,socket2,4,2,5,1)) newConnectionReading = true;
-              //if(fakeConnection(socket1,socket2,7,1,5,1)) newConnectionReading = true;
-              if(fakeConnection(socket1,socket2,5,2,0,0)) newConnectionReading = true;
             }
       
             if(newConnectionReading != patchCableConnections[socket1][socket2]) {
@@ -259,15 +250,31 @@ void loop() {
         }
       }
     }
-  }
 
-  boolean anyCablesInvalid = false;
-  for(int i=0;i<MAX_CABLES;i++) {
-    if(patchCables[i]!=NULL) {
-      if(!patchCables[i]->isValid()) anyCablesInvalid = true;
+    boolean anyCablesInvalid = false;
+    for(int i=0;i<MAX_CABLES;i++) {
+      if(patchCables[i]!=NULL) {
+        if(!patchCables[i]->isValid()) anyCablesInvalid = true;
+      }
+    }
+    
+    // set polyphony according to toggle switch
+    polyphony = digitalRead(POLYPHONY_TOGGLE_PIN) ? MAX_POLYPHONY : 1;
+    keyboardHandler.setPolyphony(polyphony);
+    mainMixer.gain(1,polyphony>1);
+    mainMixer.gain(2,polyphony>1);
+    mainMixer.gain(3,polyphony>1);
+
+    // light an LED to indicate bad patch cable wiring
+    if(anyCablesInvalid) {
+      digitalWrite(ERROR_LED_PIN, errorLedCycles >= ERROR_LED_FLASH_CYCLES);
+      errorLedCycles ++;
+      if(errorLedCycles == 2 * ERROR_LED_FLASH_CYCLES) errorLedCycles = 0;
+    } else {
+      digitalWrite(ERROR_LED_PIN, LOW);
+      errorLedCycles = 0;
     }
   }
-  // light an LED to indicate bad patch cable wiring
   
   //Serial.print("MEM: ");
   //Serial.println(AudioMemoryUsageMax());
