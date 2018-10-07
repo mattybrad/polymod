@@ -22,6 +22,7 @@ void KeyboardHandler::update() {
         // note pressed
         
         int bestChannel = -1;
+        int backupChannel = -1;
         for(int j=0;j<_polyphony;j++) {
           if(!_channels[j].noteOn) {
             // channel is free
@@ -33,12 +34,25 @@ void KeyboardHandler::update() {
             } else {
               bestChannel = j;
             }
+          } else {
+            // channel not free but check in case it is best backup channel
+
+            if(backupChannel >= 0) {
+              if(_channels[j].note < _channels[backupChannel].note) {
+                backupChannel = j;
+              }
+            } else {
+              backupChannel = j;
+            }
           }
         }
         if(bestChannel >= 0) {
           // free channel found
           _channels[bestChannel].note = i;
           _channels[bestChannel].noteOn = true;
+        } else if(backupChannel >= 0) {
+          _channels[backupChannel].note = i;
+          _channels[backupChannel].noteOn = true;
         } else {
           // can't find channel
         }
